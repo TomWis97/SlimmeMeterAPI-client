@@ -2,6 +2,7 @@ from mysql.connector import connection
 import getpass
 import random
 import sys
+import configparser
 print("--------- Database setup script for SlimmeMeterAPI-client ---------")
 print("""This script will ask the following things:
     - Database host.
@@ -15,8 +16,8 @@ This script will create a new database and user with the same name.
 After succes, the configuration file will be changed automatically.
 
 Options:
-    - overwrite: Overwrite current database. THIS WILL DELETE ALL CURRENT
-                 DATA!
+    - overwrite: Overwrite current database. THIS WILL DELETE ALL
+                 CURRENT DATA!
     - defaults:  Automatically accept default values.
 
     Usage:       $ python3 setupdb.py defaults overwrite 
@@ -29,6 +30,7 @@ dbAdminPassword = ''
 dbName = ''
 dbUsername = ''
 dbPassword = ''
+writeConfig = ''
 
 if not 'defaults' in sys.argv:
     dbHost = input("Database host [127.0.0.1]: ")
@@ -36,7 +38,16 @@ if not 'defaults' in sys.argv:
     dbName = input("Database name [slimmemeter]: ")
     dbUsername = input("Database username [slimmemeter]: ")
     dbPassword = getpass.getpass(prompt='Database user password [automatically generated]: ')
+    while not (writeConfig == True or writeConfig == False):
+        writeInput = input("Write to configuration file? [Y/n] ")
+        if writeInput in ['', 'yes', 'y', 'Y']:
+            writeConfig = True
+            print("Config will be written to file.")
+        elif writeInput in ['no', 'n', 'N']:
+            writeConfig = False
+            print("Not writing to config file.")
 else:
+    writeConfig = True
     print("\n'defaults' option detected. Using defaults.")
 
 # Setting defaults.
@@ -70,6 +81,7 @@ print("\n---------- DATA ----------",
 "Database name:          %s" % dbName,
 "Database username:      %s" % dbUsername,
 "Database user password: %s" % dbPassword,
+"Write to config file:   %s" % writeConfig,
 sep='\n')
 print("--------------------------")
 
@@ -127,5 +139,17 @@ print("Switching to database.")
 cursor.execute('USE {}'.format(dbName))
 print("Creating tables.")
 cursor.execute('CREATE TABLE history (timestamp DATETIME NOT NULL, name VARCHAR(30) NOT NULL, value VARCHAR(1024) NOT NULL, PRIMARY KEY (timestamp, name))')
-print("Done!")
+print("Writing to configuration file.")
 
+if writeConfig == True:
+    # Configuration file writing.
+    config = configparser.ConfigParser(allow_no_value=True)
+    config.read('config.ini')
+    config.set('client', 'dbUser', dbUsername)
+    config.set('client', 'dbPassword', dbPassword)
+    config.set('client', 'dbDatabase', dbName)
+    config.set('client', 'dbHost', dbHost)
+    with open('config.ini', 'w') as configfile:
+        config.write(configfile)
+
+print("Done!")
