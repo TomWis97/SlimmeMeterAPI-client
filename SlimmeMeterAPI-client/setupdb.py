@@ -132,6 +132,7 @@ else:
 print("Creating database.")
 cursor.execute('CREATE DATABASE {} DEFAULT CHARACTER SET \'utf8\''.format(dbName))
 print("Creating user.")
+# TODO: Oh, this breaks when using a remote MySQL Server. Instead of @<host>, use local IP.
 cursor.execute('CREATE USER %s@%s IDENTIFIED BY %s', (dbUsername, dbHost, dbPassword))
 print("Granting access to new database.")
 cursor.execute('GRANT ALL ON {}.* TO %s@%s'.format(dbName), (dbUsername, dbHost))

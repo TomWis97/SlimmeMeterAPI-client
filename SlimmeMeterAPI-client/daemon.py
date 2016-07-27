@@ -5,6 +5,7 @@ import urllib.parse
 import interpreter
 from mysql.connector import connection
 from datetime import datetime
+import timeit
 
 # Configuration reader
 config = configparser.ConfigParser()
@@ -45,10 +46,12 @@ def processData(input):
                 # This doesn't preserve seconds. But that shouldn't matter because these values
                 # should only refresh once per hour.
                 lastInDb = result[0].strftime('%Y-%m-%d %H:%M:%S')
-                if lastInDb > interpreter.converttimestamp(historyItem['timestamp']):
-                    print("Writing to DB!", datetime.datetime())
+                if lastInDb < historyItem['timestamp']:
+                    print("Writing to DB!")
                     query = "INSERT INTO history ( timestamp, name, value ) VALUES ( %s, %s, %s )"
                     cursor.execute(query, (historyItem['timestamp'], historyItem['name'],  historyItem['value']))
+                #else:
+                    #print("Not writing lastReading to DB. lastInDb", lastInDb, "   historyItem['timestamp']:", historyItem['timestamp'])
         else:
             query = "INSERT INTO history ( timestamp, name, value ) VALUES ( %s, %s, %s )"
             cursor.execute(query, (timestamp, historyItem['name'],  historyItem['value']))
