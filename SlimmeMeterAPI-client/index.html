@@ -55,27 +55,62 @@
 			  crossorigin="anonymous"></script>
   </head>
   <body>
-
+    <script>
+    // ALRIGHT THIS IS MY FIRST TIME ATTEMPTING FUCKING JAVASCRIPT. HOLY SHIT IF THIS EVER ENDS UP WORKING FOR SOME UNKNOWN REASON PRAISE THE LORD AND THE FLYING SPAGHETTI MONSTER BECAUSE HOLY FUCK JAVASCRIPT IS FUCKING HAAAAARD.
+    $.getJSON( "http://rpi3:19353/", function( data ) {
+      //document.write(data);
+      //console.log(data);
+      $.each( data, function( key, val ) {
+        // THERE ARE AT LEAST A MILLION WAYS TO DO THIS BETTER BUT THIS WORKS SO FUCK IT.
+        if (val.name == "meterToT1" || val.name == "meterToT2") {
+          var newvalue = val.value[0].split('*')[0].replace('.', ',').replace(/^0+/, '');
+          document.getElementById(val.name).innerHTML = newvalue + " kWh";
+        } else if (val.name == "actualPowerDelivered"){
+          var newvalue = val.value[0].split('*')[0].replace('.', ',').replace(/^0+/, '');
+          if (newvalue[0] == ','){
+            newvalue = '0' + newvalue;
+          }
+          document.getElementById(val.name).innerHTML = newvalue + " kW";
+        } else if (val.name == 'currentTariff') {
+          var newvalue = '?'
+          if (val.value[0] == '0001') {
+            newvalue = 'piek';
+          } else if (val.value[0] == '0002'){
+            newvalue = 'dal';
+          }
+          document.getElementById(val.name).innerHTML = newvalue;
+        } else if (val.name == '1lastReading') {
+          var newvalue = val.value[1].split('*')[0].replace('.', ',').replace(/^0+/, '');
+          document.getElementById(val.name).innerHTML = newvalue + " m<sup>3</sup>";
+        } else if (val.name == 'totalPowerFailures' || val.name == 'totalLongPowerFailures' || val.name == 'voltageSagsL1' || val.name == 'voltageSwellsL1') {
+          var newvalue = val.value[0].replace(/^0+/, '');
+          if (newvalue == '') {
+            newvalue = '0';
+          }
+          document.getElementById(val.name).innerHTML = newvalue;
+        }
+      });
+    });
+    </script>
     <div class="container">
       <h1>SlimmeMeterAPI</h1>
       <table>
         <tr class="firstrow">
-          <td colspan="3"><h2>Huidig verbruik</h2><p id="huidigverbruik">{huidigverbruik} W</p></td>
-          <td><p id="dagnacht">piek</p></td>
+          <td colspan="3"><h2>Huidig verbruik</h2><p id="actualPowerDelivered">--- W</p></td>
+          <td><p id="currentTariff">---</p></td>
         </tr>
         <tr>
-          <td colspan="2"><h2>Meterstand dag</h2><p id="dagverbruik">{dagstand} kWh</p></td>
-          <td colspan="2"><h2>Meterstand nacht</h2><p id="nachtverbruik">{nachtstand} kWh</p></td>
+          <td colspan="2"><h2>Meterstand dag</h2><p id="meterToT1">--- kWh</p></td>
+          <td colspan="2"><h2>Meterstand nacht</h2><p id="meterToT2">--- kWh</p></td>
         </tr>
         <tr>
-          <td colspan="2"><h2>Meterstand stroom</h2><p id="totaalstroom">{totaal} kWh</p></td>
-          <td colspan="2"><h2>Meterstand gas</h2><p id="totaalgas">{gasstand} m<sup>3</sup></p></td>
+          <td colspan="4"><h2>Meterstand gas</h2><p id="1lastReading">--- m<sup>3</sup></p></td>
         </tr>
         <tr>
-          <td><h2 class="smallh2">Stroomuitval</h2><p id="stroomuitval">{stroomuitval}</td></td>
-          <td><h2 class="smallh2">Lange stroomuitval</h2><p id="langestroomuitval">{langestroomuitval}</p></td>
-          <td><h2 class="smallh2">Spanningsdips</h2><p id="spanningsdips">{spanningsdips}<p></td>
-          <td><h2 class="smallh2">Spanningspieken</h2><p id="spanningspieken">{spanningspieken}</p></td>
+          <td><h2 class="smallh2">Stroomuitval</h2><p id="totalPowerFailures">---</td></td>
+          <td><h2 class="smallh2">Lange stroomuitval</h2><p id="totalLongPowerFailures">---</p></td>
+          <td><h2 class="smallh2">Spanningsdips</h2><p id="voltageSagsL1">---<p></td>
+          <td><h2 class="smallh2">Spanningspieken</h2><p id="voltageSwellsL1">---</p></td>
         </tr>
       </table>
   </div>
