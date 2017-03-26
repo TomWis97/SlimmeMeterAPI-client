@@ -42,8 +42,8 @@ def processData(input):
     for historyItem in historyToSave:
         # TODO: Instead of lastreading, look at configuration file.
         if historyItem['name'] in hourlyHistoryItems:
-            db.storeHourlyData(timestamp, historyItem['name'],
-                               historyItem['value'])
+            db.storeHourlyData(historyItem['timestamp'],
+                               historyItem['name'], historyItem['value'])
         else:
             db.storeData(timestamp, historyItem['name'], historyItem['value'])
 
