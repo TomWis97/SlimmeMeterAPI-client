@@ -8,7 +8,7 @@ class mySqlDb:
             password=password,
             host=host,
             database=database)
-        self.cursor = cnx.cursor()
+        self.cursor = self.cnx.cursor()
 
     def getLast24Hour(self, name):
         """Gets data from the last 24 hours from a given name."""
