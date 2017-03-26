@@ -23,6 +23,19 @@ cnx = connection.MySQLConnection(
 )
 cursor = cnx.cursor()
 
+def dbGetLast24Hour(name):
+    """Gets data from the last 24 hours from a given name."""
+    query = 'SELECT * FROM history WHERE timestamp > DATE_SUB(CURDATE(), INTERVAL 1 DAY) AND name = %s'
+    cursor.execute(query, (name,))
+    
+
+def dbGetLastMonth(name):
+    """Gets data from the last 30 days from a given name."""
+    query = 'SELECT * FROM history WHERE name = %s AND timestamp > DATE_SUB(CURDATE(), INTERVAL 30 DAY) GROUP BY DATE(timestamp)'
+    cursor.execute(query, (name,))
+    result = cursor.fetchall()
+    return result
+
 def processData(input):
     timestamp = ''
     historyToSave = []
@@ -57,9 +70,11 @@ def processData(input):
             cursor.execute(query, (timestamp, historyItem['name'],  historyItem['value']))
     cnx.commit()
 
+
 class webserverHandler(BaseHTTPRequestHandler):
     def do_POST(self):
         # TODO: Fix this MASSIVE security hole. Do as I say, not as I do.
+        # To future me: I'm talking about the ability for everyone who had access to the server to send data.
         self.send_response(200)
         self.send_header("Content-Type", "text/plain")
         self.end_headers()
@@ -70,6 +85,14 @@ class webserverHandler(BaseHTTPRequestHandler):
         #print("datastring", datastring)
         inputJson = json.loads(data.decode('UTF-8'))
         processData(inputJson)
+
+    def do_GET(self):
+        if self.path == '/debug':
+            self.send_response(200)
+            self.send_header("Content-Type", "text/html")
+            self.end_headers()
+            self.wfile.write('<h1>Jeej!</h1>'.encode('UTF-8'))
+        
 
 myServer = HTTPServer(('', httpPort), webserverHandler)
 myServer.serve_forever()
