@@ -45,7 +45,7 @@ class mySqlDb:
             # There isn't an item already in the database.
             self.storeData(timestamp, name, value)
         else:
-            lastInDb = result[0].strftime('%Y-%m-%d %H:%M:%S')
+            lastInDb = r[0].strftime('%Y-%m-%d %H:%M:%S')
             if lastInDb < timestamp:
                 print("Writing to DB!")
                 self.storeData(timestamp, name, value)

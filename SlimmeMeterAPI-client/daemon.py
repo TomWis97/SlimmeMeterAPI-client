@@ -35,15 +35,15 @@ def processData(input):
     for item in input:
         if item['name'] == 'timestamp':
             timestamp = interpreter.converttimestamp(item['value'][0])
-        if item['name'] in historyItems:
+        if item['name'] in historyItems or item['name'] in hourlyHistoryItems:
             # Interpreting each item
             historyToSave.append(interpreter.interpretValue(item['name'],
                                  item['value']))
     for historyItem in historyToSave:
         # TODO: Instead of lastreading, look at configuration file.
         if historyItem['name'] in hourlyHistoryItems:
-            db.storeHourlyData(timestamp, historyItem['name'],
-                               historyItem['value'])
+            db.storeHourlyData(historyItem['timestamp'],
+                               historyItem['name'], historyItem['value'])
         else:
             db.storeData(timestamp, historyItem['name'], historyItem['value'])
 
