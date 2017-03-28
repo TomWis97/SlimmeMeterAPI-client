@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import configparser
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import json
@@ -24,7 +25,10 @@ if dbType == 'mysql':
         config['client']['dbUser'],
         config['client']['dbPassword'])
 elif dbType == 'opentsdb':
-    raise ValueError("OpenTSDB isn't implemented yet.")
+    db = storage.openTsdbDb(
+        config['client']['otsdbHost'],
+        config['client']['otsdbPort'],
+        config['client']['otsdbLocation'])
 else:
     raise ValueError("Not a valid option for database type.")
 

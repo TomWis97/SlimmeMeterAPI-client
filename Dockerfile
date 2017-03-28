@@ -25,7 +25,8 @@ RUN cd /tmp && \
     apt-get install /tmp/opentsdb-2.3.0_all.deb
 RUN /starthbase.sh & proc=$! && sleep 10 && \
     env COMPRESSION=NONE HBASE_HOME=/opt/hbase /usr/share/opentsdb/tools/create_table.sh && \
-    kill -INT $proc
+    kill -INT $proc && \
+    sed 's/#tsd.core.auto_create_metrics = false/tsd.core.auto_create_metrics = true/' /etc/opentsdb/opentsdb.conf
 EXPOSE 4242
 
 # Install and setup supervisord
@@ -33,3 +34,13 @@ RUN apt-get update && \
     apt-get install supervisor -y
 ADD conf/supervisord.conf /etc/supervisord.conf
 CMD supervisord -c /etc/supervisord.conf
+
+# Install SlimmeMeterAPI-client
+RUN mkdir /opt/SlimmeMeterAPI-client && \
+    mkdir /data/SlimmeMeterAPI-client
+ADD SlimmeMeterAPI-client/daemon.py /opt/SlimmeMeterAPI-client/daemon.py
+ADD SlimmeMeterAPI-client/interpreter.py /opt/SlimmeMeterAPI-client/interpreter.py
+ADD SlimmeMeterAPI-client/storage.py /opt/SlimmeMeterAPI-client/storage.py
+RUN chmod +x /opt/SlimmeMeterAPI-client/daemon.py && \
+    sed -i 's#config.ini#/data/SlimmeMeterAPI-client/config.ini#' /opt/SlimmeMeterAPI-client/daemon.py
+EXPOSE 19354
