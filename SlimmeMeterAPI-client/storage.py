@@ -1,3 +1,6 @@
+import datetime
+import requests
+
 class mySqlDb:
     def __init__(self, host, database, user, password):
         # Import MySQL here, so it doesn't fuck shit up when this module is
@@ -50,8 +53,20 @@ class mySqlDb:
                 print("Writing to DB!")
                 self.storeData(timestamp, name, value)
 
+    def flushData(self):
+        # TODO: Move the self.cnx.commit() to here and check if it doen't break
+        pass
+
 
 class openTsdbDb:
+    queue = []
+    def __init__(self, host, port, location):
+        import json
+        import datetime
+        self.host = str(host)
+        self.port = int(port)
+        self.location = str(location)
+
     def getLast24Hour(self, name):
         pass
 
@@ -62,7 +77,37 @@ class openTsdbDb:
         pass
 
     def storeData(self, timestamp, name, value):
-        pass
+        unixtimestamp = self.convertUnixTimestamp(timestamp)
+        dataDict = {
+            'metric': name,
+            'timestamp': unixtimestamp,
+            'value': value,
+            'tags': {
+                'location': self.location
+            }
+        }
+        self.queue.append(dataDict)
+
+    def flushData(self):
+        #print(self.queue)
+        url = 'http://' + self.host + ':' + str(self.port) + '/api/put'
+        r = requests.post(url, json = self.queue)
+        self.queue = []
 
     def storeHourlyData(self, timestamp, name, value):
         pass
+
+    def convertUnixTimestamp(self, timestamp):
+        """Convert an MySQL timestamp (YYYY-MM-DD HH:MM:SS) to epoch."""
+        date, time = timestamp.split(' ')
+        year, month, day = date.split('-')
+        hour, minute, second = time.split(':')
+        # Note to self: How to handle timezones?
+        year = int(year)
+        month = int(month)
+        day = int(day)
+        hour = int(hour)
+        minute = int(minute)
+        second = int(second)
+        dtobj = datetime.datetime(year, month, day, hour, minute, second)
+        return int(dtobj.timestamp())

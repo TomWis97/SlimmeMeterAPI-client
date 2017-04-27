@@ -50,6 +50,7 @@ def processData(input):
                                historyItem['name'], historyItem['value'])
         else:
             db.storeData(timestamp, historyItem['name'], historyItem['value'])
+    db.flushData()
 
 
 class webserverHandler(BaseHTTPRequestHandler):

@@ -12,6 +12,8 @@ def interpretValue(name, value):
         return {'name': name, 'value': fixedValue}
 
 def converttimestamp(value):
-    """Converts a timestamp from YYMMDDHHmmSSX to MySQL timestamp."""
+    """Converts a timestamp from YYMMDDHHmmSSX to MySQL timestamp.
+    'YYYY-MM-DD HH:MM:SS"""
     # TODO Interpret DST.
-    return '20' + value[0:2] + '-' + value[2:4] + '-' + value[4:6] + ' ' + value[6:8] + ':' + value[8:10] + ':' + value[10:12]
+    return ('20' + value[0:2] + '-' + value[2:4] + '-' + value[4:6] + ' ' +
+            value[6:8] + ':' + value[8:10] + ':' + value[10:12])
